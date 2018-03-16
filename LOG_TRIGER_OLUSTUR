@@ -1,0 +1,34 @@
+CREATE OR REPLACE PROCEDURE "ECZANE"."LOG_TRIGER_OLUSTUR"
+AUTHID CURRENT_USER
+AS
+p_ID NUMBER;
+p_DELETE VARCHAR2(1500);
+p_UPDATE VARCHAR2(1500);
+-- grant select,insert,update,delete on YKLOG.ADRES to ECZANE VERILMELI TUM TABLOLARA.
+-- GRANT CREATE ANY TRIGGER TO ECZANE
+BEGIN
+DBMS_OUTPUT.PUT_LINE('TANIMLAMA OLDU');
+p_ID:=0;
+DBMS_OUTPUT.PUT_LINE(p_ID||' sayisi olusturuldu');
+FOR x IN (SELECT * FROM ZTABLELIST where LOG_TABLE='Y')
+        LOOP
+p_DELETE:=createloginsertstatement('ECZANE',x.table_name,':OLD', 'ECZANE',1,'DELETE' );  
+DBMS_OUTPUT.PUT_LINE(p_DELETE||' DELETE OLUSTU');  
+ 
+p_UPDATE:=createloginsertstatement('ECZANE',x.table_name,':OLD', 'ECZANE',1,'UPDATE' ); 
+DBMS_OUTPUT.PUT_LINE(p_UPDATE||' UPDATE OLUSTU');         
+        EXECUTE IMMEDIATE'
+                CREATE OR REPLACE TRIGGER TRG_'|| x.table_name ||' 
+                before update or delete on ECZANE.' || x.table_name || ' for each row
+                begin
+                if deleting then '||p_DELETE||'
+                ELSE '||p_UPDATE||'        
+                end if;
+                END;';
+        p_ID:=p_ID+1   ;   
+        DBMS_OUTPUT.PUT_LINE(p_ID||' TRG_'|| x.table_name ||' olusturuldu');
+        EXECUTE IMMEDIATE 'ALTER TRIGGER ECZANE.TRG_'|| x.table_name ||' enable';
+        DBMS_OUTPUT.PUT_LINE(p_ID||' TRG_'|| x.table_name ||' ENABLE EDILDI');
+        END LOOP;        
+END;
+
