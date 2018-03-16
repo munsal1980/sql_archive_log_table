@@ -1,0 +1,47 @@
+CREATE OR REPLACE PROCEDURE "ECZANE"."LOG_TABLE_OLUSTUR"
+AUTHID CURRENT_USER
+AS
+BEGIN
+/* once bunlar yapilmali
+create user YKLOG identified by oracle;
+grant connect to YKLOG;
+ALTER USER YKLOG QUOTA UNLIMITED ON users;
+
+grant
+ALTER ANY INDEX,
+ALTER ANY MATERIALIZED VIEW,
+ALTER ANY PROCEDURE,
+ALTER ANY SEQUENCE,
+ALTER ANY TABLE,
+CREATE ANY INDEX,
+CREATE ANY MATERIALIZED VIEW,
+CREATE ANY PROCEDURE,
+CREATE ANY SEQUENCE,
+CREATE ANY SYNONYM,
+CREATE ANY TABLE,
+CREATE ANY TRIGGER,
+CREATE ANY VIEW,
+CREATE MATERIALIZED VIEW,
+CREATE PROCEDURE,
+CREATE PUBLIC SYNONYM,
+CREATE ROLE,
+CREATE SEQUENCE,
+CREATE SYNONYM,
+CREATE TABLE,
+CREATE TRIGGER,
+CREATE VIEW TO ECZANE;
+*/
+FOR x IN (SELECT * FROM ZTABLELIST where LOG_TABLE='Y')
+        LOOP
+                EXECUTE IMMEDIATE 'create table ECZANE.Z_' || x.table_name || ' AS (select * from ECZANE.' || x.table_name ||' WHERE 1=2)';
+                --EXECUTE IMMEDIATE 'GRANT ALL ON YKLOG.' || x.table_name || ' TO YENIKREDI';
+                
+                EXECUTE IMMEDIATE 'alter table ECZANE.Z_'|| x.table_name ||' add logid number';
+	        EXECUTE IMMEDIATE 'alter table ECZANE.Z_'|| x.table_name ||' add logack VARCHAR2(250)';
+	        EXECUTE IMMEDIATE 'alter table ECZANE.Z_'|| x.table_name ||' add logtrh DATE';
+	        EXECUTE IMMEDIATE 'alter table ECZANE.Z_'|| x.table_name ||' add LOGUSR VARCHAR2(100)';
+	     
+	        DBMS_OUTPUT.PUT_LINE(x.table_name ||' TABLOSU OLUSTURULDU...');
+        END LOOP;
+  
+END;
